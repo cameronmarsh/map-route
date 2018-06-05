@@ -12,6 +12,7 @@ import javafx.scene.text.Text;
 import javafx.scene.web.WebEngine;
 import javafx.scene.web.WebView;
 import javafx.stage.Stage;
+import sun.plugin.javascript.JSObject;
 
 public class MapRouteApplication extends Application {
     @Override
@@ -30,7 +31,8 @@ public class MapRouteApplication extends Application {
         final WebEngine webEngine = webView.getEngine();
         webEngine.load(this.getClass().getResource("/edu/swarthmore/cs/cmarsh1/maproute/view/map.html").toString());
 
-        Text text  = new Text("Your route is soooo long!");
+        Text text = new Text("Run run run run run");
+
 
         BorderPane borderPane = new BorderPane();
         borderPane.setTop(hBox);
