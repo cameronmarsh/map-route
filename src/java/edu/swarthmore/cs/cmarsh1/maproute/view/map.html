@@ -23,7 +23,6 @@
     <script>
         var map, infoWindow, textResponse, directionsService, directionsDisplay;
 		var points = [];
-
         function initMap(){
             var options = {
                 zoom: 16,
@@ -36,9 +35,9 @@
 			directionsService = new google.maps.DirectionsService();
 			directionsDisplay = new google.maps.DirectionsRenderer();
 
+			directionsDisplay.setOptions({draggable: true,  preserveViewport: true});
 			directionsDisplay.setMap(map);
 
-			console.log("HERE");
             //Try HTML5 Geolocation
             if(navigator.geolocation){
               //TODO: set the position of the map to the location (maybe only if a button is pressed on the javaFX app?)
@@ -49,23 +48,21 @@
             }
 
 
-          var pos;
-		  var waypoints = [];
-          google.maps.event.addListener(map,'click', function(event) {
-              //console.log(event.latLng.lat() + ', ' + event.latLng.lng());
-              //var marker = new google.maps.Marker({position: event.latLng, map: map});
-              var circle = new google.maps.Circle({center: event.latLng, map: map, radius: 10, strokeWeight: 1});
+		  //listen for click, and recalculate route with new waypoint
+	        var pos, res;
+            google.maps.event.addListener(map,'click', function(event) {
+              //var circle = new google.maps.Circle({center: event.latLng, map: map, radius: 10, strokeWeight: 1});
 			  points.push(event.latLng);
-			  console.log(points[points.length-1].lat());
-			  //console.log(waypoints[waypoints.length - 1].lat() + ", " + waypoints[waypoints.length - 1].lng());
 
 			  //calculate waypoints
+			  var waypoints = [];
 			  points.slice(1, points.length-1).forEach(function(pt){
 				waypoints.push({
-					location: pt, stopover: false
+					location: pt, stopover: true
 				});
 			  });
-			 
+
+			  //create directions request
 			  var request = {
 				origin: points[0],
 				destination: points[points.length - 1],
@@ -76,12 +73,18 @@
 				unitSystem: google.maps.UnitSystem.IMPERIAL
 			  };
 
-			 directionsService.route(request, function(result, status){
+			  //display directions result
+			  var distance = 0;
+			  directionsService.route(request, function(result, status){
 				if(status=="OK"){
+					//result.routes = result.routes[0];
 					directionsDisplay.setDirections(result);
+					result.routes[0].legs.forEach(function(leg){
+						distance += leg.distance.value;
+					});
+					console.log(distance*0.000621371 + " mi.");
 				} 
 
-				console.log(status);
 			 });
 			
           });
