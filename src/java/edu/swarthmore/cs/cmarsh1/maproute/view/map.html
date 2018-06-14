@@ -6,8 +6,23 @@
     <meta charset="utf-8">
     <style>
       #mapcanvas {
+        position: relative;
         height: 100%;
         width: 100%;
+        top: 0%
+      }
+
+      #textbox {
+        position: absolute;
+        bottom: 5px;
+        right: 50px;
+        color: white;
+        background-color: black;
+        padding: 5px;
+        text-align: center;
+        font-family: sans-serif;
+        font-size: 24px;
+        font-weight: bold;
       }
 
       html, body {
@@ -20,9 +35,13 @@
 
   <body>
     <div id="mapcanvas"></div>
-    <script>
+    <script id="mapcode">
+        //global variables
         var map, infoWindow, textResponse, directionsService, directionsDisplay;
+        var distance = 0;
 		var points = [];
+
+
         function initMap(){
             var options = {
                 zoom: 16,
@@ -48,7 +67,7 @@
             }
 
 
-		  //listen for click, and recalculate route with new waypoint
+		    //listen for click, and recalculate route with new waypoint
 	        var pos, res;
             google.maps.event.addListener(map,'click', function(event) {
               //var circle = new google.maps.Circle({center: event.latLng, map: map, radius: 10, strokeWeight: 1});
@@ -74,7 +93,7 @@
 			  };
 
 			  //display directions result
-			  var distance = 0;
+			  distance = 0;
 			  directionsService.route(request, function(result, status){
 				if(status=="OK"){
 					//result.routes = result.routes[0];
@@ -83,13 +102,17 @@
 						distance += leg.distance.value;
 					});
 					console.log(distance*0.000621371 + " mi.");
+					document.getElementById("textbox").innerHTML = "Distance: " + (distance*0.000621371).toFixed(2) + " mi."
 				} 
 
 			 });
 			
           });
         }
+
+
     </script>
+    <p id="textbox">Distance: 0.00 mi.</p>
     <script src="https://maps.googleapis.com/maps/api/js?key=AIzaSyD5_YFbGp2bLEB1zObhjeOE6IPeAVVWdqY&callback=initMap"
     async defer></script>
   </body>
