@@ -42,7 +42,7 @@
 		var points = [];
 
 
-        function initMap(){
+        function initMap() {
             var options = {
                 zoom: 16,
                 center: new google.maps.LatLng(40.0007, -83.07003),
@@ -61,6 +61,16 @@
             if(navigator.geolocation){
               //TODO: set the position of the map to the location (maybe only if a button is pressed on the javaFX app?)
               console.log("Geolocation is working");
+              navigator.geolocation.getCurrentPosition(function(position){
+                  var pos = {
+                      lat: position.coords.latitude,
+                      lng: position.coords.longitude
+                  };
+
+                  map.setCenter(pos);
+              }, function() {
+				  console.log("Error, geolocation could not find your position");
+			  });
 
             } else {
               console.log("Error, geolocation service failed");
@@ -72,7 +82,13 @@
             google.maps.event.addListener(map,'click', function(event) {
               //var circle = new google.maps.Circle({center: event.latLng, map: map, radius: 10, strokeWeight: 1});
 			  points.push(event.latLng);
+			  updateMap();
 
+			 });
+			
+        }
+
+		function updateMap() {
 			  //calculate waypoints
 			  var waypoints = [];
 			  points.slice(1, points.length-1).forEach(function(pt){
@@ -102,13 +118,29 @@
 						distance += leg.distance.value;
 					});
 					console.log(distance*0.000621371 + " mi.");
-					document.getElementById("textbox").innerHTML = "Distance: " + (distance*0.000621371).toFixed(2) + " mi."
+					document.getElementById("textbox").innerHTML = "Distance: " + (distance*0.000621371).toFixed(2) + " mi.";
 				} 
 
 			 });
+		}
 			
-          });
-        }
+		function loopRoute() {
+			points.push(points[0]);
+			updateMap();
+		}
+
+		function clearAllPoints() {
+			//for(var i=0; i<points.length; i++){
+				
+			//}
+
+			directionsDisplay.setMap(null);		
+	
+			points = [];
+			distance = 0;
+			document.getElementById("textbox").innerHTML = "Distance: 0.00 mi."; //maybe make this a function
+			initMap();
+		}	
 
 
     </script>

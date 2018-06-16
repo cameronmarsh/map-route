@@ -27,9 +27,9 @@ public class MapRouteApplication extends Application {
         //create toolbar buttons
         HBox hBox = new HBox(10);
         Button reset = new Button("Reset");
-        Button createLooop = new Button("Create Loop");
+        Button createLoop = new Button("Create Loop");
         TextField textField = new TextField();
-        hBox.getChildren().addAll(reset, createLooop, textField);
+        hBox.getChildren().addAll(reset, createLoop, textField);
 
         //create the map display
         final WebView webView = new WebView();
@@ -52,6 +52,10 @@ public class MapRouteApplication extends Application {
 //                }
 //            }
 //        });
+
+        //add listeners to the buttons
+        createLoop.setOnAction(click -> webEngine.executeScript("loopRoute()"));
+        reset.setOnAction(click -> webEngine.executeScript("clearAllPoints()"));
 
         BorderPane borderPane = new BorderPane();
         borderPane.setTop(hBox);
