@@ -30,15 +30,50 @@
         margin: 0;
         padding: 0;
       }
+
+      #pac-container {
+        padding-bottom: 12px;
+        margin-right: 12px;
+      }
+
+    .pac-controls {
+        display: inline-block;
+        padding: 5px 11px;
+     }
+
+    .pac-controls label {
+        font-family: Roboto;
+        font-size: 13px;
+        font-weight: 300;
+    }
+
+    #pac-input {
+        position: absolute;
+        background-color: #fff;
+        font-family: Roboto;
+        font-size: 18px;
+        font-weight: 300;
+        margin-right: 12px;
+        margin-top: 12px;
+        padding: 0 11px 0 13px;
+        text-overflow: ellipsis;
+        width: 300px;
+        height: 30px;
+    }
+
+    #pac-input:focus {
+        border-color: #4d90fe;
+    }
+
     </style>
   </head>
 
   <body>
     <div id="mapcanvas"></div>
+	<input id="pac-input" class="controls" type="text" placeholder="Search">
     <script id="mapcode">
         //global variables
-        var map, infoWindow, textResponse, directionsService, directionsDisplay;
-        var distance = 0;
+        var map, infoWindow, textResponse, directionsService, directionsDisplay, center;
 		var points = [];
 
 
@@ -57,9 +92,38 @@
 			directionsDisplay.setOptions({draggable: true,  preserveViewport: true});
 			directionsDisplay.setMap(map);
 
+			//Create search box 
+			var input = document.getElementById('pac-input');
+			var searchBox = new google.maps.places.SearchBox(input);
+			map.controls[google.maps.ControlPosition.TOP_RIGHT].push(input);
+
+			map.addListener('bounds_changed', function() {
+				searchBox.setBounds(map.getBounds());
+			});
+
+			searchBox.addListener('places_changed', function() {
+				var places = searchBox.getPlaces();
+
+				if(places.length == 0){
+					return;
+				}
+
+				places.forEach(function(place) {
+					if (!place.geometry) {
+            			console.log("Returned place contains no geometry");
+              			return;
+            		}
+
+					map.setCenter(place.geometry.location)
+				});
+
+
+			});
+
+			
+
             //Try HTML5 Geolocation
             if(navigator.geolocation){
-              //TODO: set the position of the map to the location (maybe only if a button is pressed on the javaFX app?)
               console.log("Geolocation is working");
               navigator.geolocation.getCurrentPosition(function(position){
                   var pos = {
@@ -80,7 +144,6 @@
 		    //listen for click, and recalculate route with new waypoint
 	        var pos, res;
             google.maps.event.addListener(map,'click', function(event) {
-              //var circle = new google.maps.Circle({center: event.latLng, map: map, radius: 10, strokeWeight: 1});
 			  points.push(event.latLng);
 			  updateMap();
 
@@ -109,16 +172,14 @@
 			  };
 
 			  //display directions result
-			  distance = 0;
+			  var distance = 0;
 			  directionsService.route(request, function(result, status){
 				if(status=="OK"){
-					//result.routes = result.routes[0];
 					directionsDisplay.setDirections(result);
 					result.routes[0].legs.forEach(function(leg){
 						distance += leg.distance.value;
 					});
-					console.log(distance*0.000621371 + " mi.");
-					document.getElementById("textbox").innerHTML = "Distance: " + (distance*0.000621371).toFixed(2) + " mi.";
+					setDistance(distance);
 				} 
 
 			 });
@@ -130,22 +191,29 @@
 		}
 
 		function clearAllPoints() {
-			//for(var i=0; i<points.length; i++){
-				
-			//}
-
-			directionsDisplay.setMap(null);		
-	
+			directionsDisplay.set('directions', null);
 			points = [];
-			distance = 0;
-			document.getElementById("textbox").innerHTML = "Distance: 0.00 mi."; //maybe make this a function
-			initMap();
-		}	
+			setDistance(0);
+		}
+
+		function undoClick() {
+		    if(points.length < 2){
+		        clearAllPoints();
+		        return;
+		    }
+
+		    points = points.slice(0, points.length-1);
+		    updateMap();
+		}
+
+		function setDistance(dist) {
+		    document.getElementById("textbox").innerHTML = "Distance: " + (dist*0.000621371).toFixed(2) + " mi.";
+		}
 
 
     </script>
     <p id="textbox">Distance: 0.00 mi.</p>
-    <script src="https://maps.googleapis.com/maps/api/js?key=AIzaSyD5_YFbGp2bLEB1zObhjeOE6IPeAVVWdqY&callback=initMap"
+    <script src="https://maps.googleapis.com/maps/api/js?key=AIzaSyD5_YFbGp2bLEB1zObhjeOE6IPeAVVWdqY&callback=initMap&libraries=places"
     async defer></script>
   </body>
 </html>

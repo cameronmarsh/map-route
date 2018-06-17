@@ -1,4 +1,4 @@
-package edu.swarthmore.cs.cmarsh1.maproute.view;
+package edu.swarthmore.cs.cmarsh1.maproute;
 
 import javafx.application.Application;
 
